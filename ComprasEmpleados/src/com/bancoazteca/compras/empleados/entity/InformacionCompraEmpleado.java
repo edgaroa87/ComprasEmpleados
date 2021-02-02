@@ -13,6 +13,8 @@ public class InformacionCompraEmpleado
 	
 	private String numeroEmpleado;
 	
+	private String icu;
+	
 	private int numeroCompras;
 	
 	private List<InformacionCompra> lstCompras;
@@ -31,6 +33,14 @@ public class InformacionCompraEmpleado
 
 	public void setNumeroEmpleado(String numeroEmpleado) {
 		this.numeroEmpleado = numeroEmpleado;
+	}
+
+	public String getIcu() {
+		return icu;
+	}
+
+	public void setIcu(String icu) {
+		this.icu = icu;
 	}
 
 	public int getNumeroCompras() {

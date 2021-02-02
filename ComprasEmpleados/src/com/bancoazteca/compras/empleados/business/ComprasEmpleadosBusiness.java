@@ -1,10 +1,14 @@
 package com.bancoazteca.compras.empleados.business;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,7 +22,6 @@ import com.bancoazteca.compras.empleados.entity.EmpleadoParticipante;
 import com.bancoazteca.compras.empleados.entity.InformacionCompra;
 import com.bancoazteca.compras.empleados.entity.InformacionCompraConciliacionSinICU;
 import com.bancoazteca.compras.empleados.entity.InformacionCompraEmpleado;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -30,7 +33,12 @@ public class ComprasEmpleadosBusiness
 	private final static String ARCHIVO_EMPLEADOS_PARTICIPANTES="EmpleadosParticipantes.txt";
 	private final static String ARCHIVO_COMPRA_COMERCIOS_SIN_ICU="ComprasComercios_SIN_ICU.txt";
 	private final static String ARCHIVO_COMPRA_EMPLEADOS="ComprasEmpleados_";
+	private final static String ARCHIVO_EXCEL_EXTENSION=".xls";
+	private final static String ARCHIVO_TXT_EXTENSION=".txt";
 	private final static String DELIMITADOR="\\|";
+	private final static String DELIMITADOR2="|";
+	private final static String COMERCIO_WALMART="Walmart";
+	private final static String COMERCIO_CHEDRAUI="Chedraui";
 	
 	
 	/**
@@ -50,6 +58,7 @@ public class ComprasEmpleadosBusiness
 	public static void generaReporteComprasEmpleadosAlnova()
 	{
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		Gson gson2 = new Gson();
 		List<InformacionCompraEmpleado> lstComprasEmpleado=new ArrayList<>();
 		
 		System.out.println("Generando Archivo de compras de empleado con Archivo Alnova...");
@@ -89,6 +98,7 @@ public class ComprasEmpleadosBusiness
 						
 						//Se agrega informacion de la nueva compra encontrada
 						InformacionCompra informacionCompra=new InformacionCompra();
+						informacionCompra.setComproEn(comercio(informacionCompraConciliacion.getIdAgente()));
 						informacionCompra.setReferencia(informacionCompraConciliacion.getReferencia());
 						informacionCompra.setMonto(informacionCompraConciliacion.getMonto());
 						informacionCompra.setFechaCompra(informacionCompraConciliacion.getFechaHoraCompra());
@@ -110,10 +120,12 @@ public class ComprasEmpleadosBusiness
 						informacionCompraEmpleado.setNombreEmpleado(empleadoParticipante.getNombreEmpleado());
 						informacionCompraEmpleado.setNumeroCompras(1);
 						informacionCompraEmpleado.setNumeroEmpleado(empleadoParticipante.getNumeroEmpleado());
+						informacionCompraEmpleado.setIcu(empleadoParticipante.getIcu());
 						
 						//Se agrega informacion de la nueva compra encontrada
 						List<InformacionCompra> lstCompras=new ArrayList<>();
 						InformacionCompra informacionCompra=new InformacionCompra();
+						informacionCompra.setComproEn(comercio(informacionCompraConciliacion.getIdAgente()));
 						informacionCompra.setReferencia(informacionCompraConciliacion.getReferencia());
 						informacionCompra.setMonto(informacionCompraConciliacion.getMonto());
 						informacionCompra.setFechaCompra(informacionCompraConciliacion.getFechaHoraCompra());
@@ -137,6 +149,7 @@ public class ComprasEmpleadosBusiness
 		
 		String informacionJson=gson.toJson(lstComprasEmpleado);
 		System.out.println("\n\nInformacion de compras...\n".concat(informacionJson));
+		generarReporteCompras(lstComprasEmpleado, gson2.toJson(lstComprasEmpleado));
 	}
 	
 	/**
@@ -266,11 +279,96 @@ public class ComprasEmpleadosBusiness
 		
 		return lstEmpleadosParticipantes;
 	}
+	
+	/**
+	 * Metodo para retornar el nombre del comercio en donde se hizo la compra
+	 * @param idComercio
+	 * @return String
+	 */
+	private static String comercio(String idComercio)
+	{
+		String comercio=COMERCIO_WALMART;
+		switch(idComercio) {
+			case "33": comercio=COMERCIO_WALMART;
+						break;
+						
+			case "49": comercio=COMERCIO_CHEDRAUI;
+						break;
+		}
+		
+		return comercio;
+	}
+	
+	/**
+	 * Metodo para generar los archivos de salida por el procesamiento de la informacion
+	 * @param lstComprasEmpleado
+	 * @param informacionJson
+	 */
+	@SuppressWarnings("deprecation")
+	private static void generarReporteCompras(List<InformacionCompraEmpleado> lstComprasEmpleado, String informacionJson)
+	{
+		Calendar sDateCalendar = new GregorianCalendar();
+
+		String semana=String.valueOf(sDateCalendar.get(Calendar.WEEK_OF_YEAR)-1).concat("-").concat(String.valueOf(sDateCalendar.get(Calendar.WEEK_OF_YEAR)));
+		System.out.println("\nGenerando archivo .txt...");
+		try {
+			String archivoTxt=RUTA_ARCHIVOS.concat(ARCHIVO_COMPRA_EMPLEADOS).concat(semana).concat(ARCHIVO_TXT_EXTENSION);
+			BufferedWriter writer = new BufferedWriter(new FileWriter(archivoTxt));
+		    writer.write(informacionJson);
+		    writer.close();
+		    System.out.println("Archivo .txt creado en ".concat(archivoTxt).concat("..."));
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("\nGenerando archivo .xls de reporte...");
+		String archivoXls=RUTA_ARCHIVOS.concat(ARCHIVO_COMPRA_EMPLEADOS).concat(semana).concat(ARCHIVO_EXCEL_EXTENSION);
+		int filaIndice=0;
+		File archivo = new File(archivoXls);
+		HSSFWorkbook libroExcel = new HSSFWorkbook();
+		HSSFSheet hoja1 = libroExcel.createSheet("Compras Empleados Semana ".concat(semana));
+		HSSFRow fila = hoja1.createRow(filaIndice);
+		HSSFCell celda = fila.createCell((short) 0);
+		celda.setCellValue("Nombre empleado");
+		HSSFCell celda2 = fila.createCell((short) 1);
+		celda2.setCellValue("Numero empleado");
+		HSSFCell celda3 = fila.createCell((short) 2);
+		celda3.setCellValue("ICU");
+		HSSFCell celda4 = fila.createCell((short) 3);
+		celda4.setCellValue("Compras");
+		HSSFCell celda5 = fila.createCell((short) 4);
+		celda5.setCellValue("Total compras");
+		
+		for(InformacionCompraEmpleado compraEmpleado: lstComprasEmpleado) {
+			filaIndice++;
+			fila=hoja1.createRow(filaIndice);
+			
+			HSSFCell celdaReferencia = fila.createCell((short) 0);
+			celdaReferencia.setCellValue(compraEmpleado.getNombreEmpleado());
+			
+			HSSFCell celdaNoEmpleado = fila.createCell((short) 1);
+			celdaNoEmpleado.setCellValue(compraEmpleado.getNumeroEmpleado());
+			
+			HSSFCell celdaICU = fila.createCell((short) 2);
+			celdaICU.setCellValue(compraEmpleado.getIcu());
+			
+			StringBuilder informacion=new StringBuilder();
+			for(InformacionCompra infoCompra:compraEmpleado.getLstCompras()) {
+				informacion.append(infoCompra.getComproEn()).append(DELIMITADOR2).append(infoCompra.getReferencia()).append(DELIMITADOR2).append(infoCompra.getFechaCompra()).append(DELIMITADOR2).append(infoCompra.getMonto()).append("\n");
+			}
+			
+			HSSFCell celdaCompras = fila.createCell((short) 3);
+			celdaCompras.setCellValue(informacion.toString());
+			
+			HSSFCell celdaTotalCompras = fila.createCell((short) 4);
+			celdaTotalCompras.setCellValue(compraEmpleado.getNumeroCompras());
+			
+		}
+		try {
+			FileOutputStream salida = new FileOutputStream(archivo);
+			libroExcel.write(salida);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
-
-
-/**
- * Calendar calendar = Calendar.getInstance(locale); 
-calendar.set(year, month, day); 
-int weekOfYear = calendar.get(Calendar.WEEK_OF_YEAR);
-**/

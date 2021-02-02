@@ -7,11 +7,21 @@ package com.bancoazteca.compras.empleados.entity;
  */
 public class InformacionCompra
 {
+	private String comproEn;
+	
 	private String referencia;
 	
 	private String fechaCompra;
 	
 	private String monto;
+
+	public String getComproEn() {
+		return comproEn;
+	}
+
+	public void setComproEn(String comproEn) {
+		this.comproEn = comproEn;
+	}
 
 	public String getReferencia() {
 		return referencia;
