@@ -16,6 +16,10 @@ public class ComprasEmpleados
 		 */
 //		ComprasEmpleadosBusiness.generarArchivoReferencias();
 		
+		/**
+		 * Necesita todos los reportes de conciliacion a leer en la ruta
+		 */
+		ComprasEmpleadosBusiness.generarReportesConciliacion();
 		
 		/**
 		 * Necesita los archivos
@@ -27,7 +31,7 @@ public class ComprasEmpleados
 		 * 		ComprasEmpleadoSemana.xls
 		 * 
 		 */
-		ComprasEmpleadosBusiness.generaReporteComprasEmpleadosAlnova();
+//		ComprasEmpleadosBusiness.generaReporteComprasEmpleadosAlnova();
 		
 		
 		/**

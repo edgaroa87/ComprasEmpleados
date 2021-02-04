@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -27,12 +28,14 @@ import com.google.gson.GsonBuilder;
 
 public class ComprasEmpleadosBusiness
 {
-	private final static String RUTA_ARCHIVOS="/Users/edgaronofrealvarez/Desktop/ReporteCompras/";
+	private final static String RUTA_ARCHIVOS="/Users/edgaronofrealvarez/Desktop/ReporteCompras/Concurso/";
+	private final static String RUTA_ARCHIVOS_CONCILIACIONES="/Users/edgaronofrealvarez/Desktop/ReporteCompras/Conciliaciones/";
 	private final static String ARCHIVO_REPORTE_REFERENCIAS_ALNOVA="ReferenciasAlnova.xls";
 	private final static String ARCHIVO_REPORTE_ALNOVA="ReporteAlnova.txt";
 	private final static String ARCHIVO_EMPLEADOS_PARTICIPANTES="EmpleadosParticipantes.txt";
 	private final static String ARCHIVO_COMPRA_COMERCIOS_SIN_ICU="ComprasComercios_SIN_ICU.txt";
 	private final static String ARCHIVO_COMPRA_EMPLEADOS="ComprasEmpleados_";
+	private final static String ARCHIVO_REPORTE_COMPRAS="ReporteCompras.xls";
 	private final static String ARCHIVO_EXCEL_EXTENSION=".xls";
 	private final static String ARCHIVO_TXT_EXTENSION=".txt";
 	private final static String DELIMITADOR="\\|";
@@ -50,6 +53,16 @@ public class ComprasEmpleadosBusiness
 		List<InformacionCompraConciliacionSinICU> lstArchivoComprasConciliacion=leerArchivoConciliacionSINICU();
 		System.out.println("Compras en archivo Conciliacion... ".concat(String.valueOf(lstArchivoComprasConciliacion.size())));
 		generaArchivoExcelReferencias(lstArchivoComprasConciliacion);
+	}
+	
+	/**
+	 * Metodo para generar los reportes de conciliacion
+	 */
+	public static void generarReportesConciliacion()
+	{
+		File folder = new File(RUTA_ARCHIVOS_CONCILIACIONES);
+		List<InformacionCompraConciliacionSinICU> lstCompras=leerArchivosConciliacionesSINICU(Arrays.asList(folder.listFiles()));
+		generarReportesCompras(lstCompras);
 	}
 	
 	/**
@@ -231,6 +244,49 @@ public class ComprasEmpleadosBusiness
 	}
 	
 	/**
+	 * Metodo para leer el archivo de conciliacion sin el ICU del cliente
+	 * @return  List<InformacionCompraConciliacionSinICU>
+	 */
+	@SuppressWarnings("resource")
+	private static List<InformacionCompraConciliacionSinICU> leerArchivosConciliacionesSINICU(List<File> lstArchivos)
+	{
+		List<InformacionCompraConciliacionSinICU> lstArchivoComprasConciliacion=new ArrayList<>();
+		
+		try {
+			for(File archivo:lstArchivos) {
+				Scanner myReader = new Scanner(archivo);
+				while (myReader.hasNextLine()) {
+					String[] informacionLinea = myReader.nextLine().split(DELIMITADOR);
+					InformacionCompraConciliacionSinICU informacionCompraConciliacionSinICU=new InformacionCompraConciliacionSinICU();
+					informacionCompraConciliacionSinICU.setIdAgente(informacionLinea[0]);
+					informacionCompraConciliacionSinICU.setDescripcionAgenteCompra(informacionLinea[1]);
+					informacionCompraConciliacionSinICU.setIdCanalCompra(informacionLinea[2]);
+					informacionCompraConciliacionSinICU.setDescripcionCanalCompra(informacionLinea[3]);
+					informacionCompraConciliacionSinICU.setReferencia(informacionLinea[4]);
+					informacionCompraConciliacionSinICU.setIdSusidiaria(informacionLinea[5]);
+					informacionCompraConciliacionSinICU.setDescripcionSubsidiaria(informacionLinea[6]);
+					informacionCompraConciliacionSinICU.setFechaHoraCompra(informacionLinea[7]);
+					informacionCompraConciliacionSinICU.setNumeroAutorizacion(informacionLinea[8]);
+					informacionCompraConciliacionSinICU.setMonto(informacionLinea[9]);
+					informacionCompraConciliacionSinICU.setComisionCliente(informacionLinea[10]);
+					informacionCompraConciliacionSinICU.setIva(informacionLinea[11]);
+					informacionCompraConciliacionSinICU.setComisionAgente(informacionLinea[12]);
+					informacionCompraConciliacionSinICU.setIvaComisionAgente(informacionLinea[13]);
+					informacionCompraConciliacionSinICU.setEstatusCompra(informacionLinea[14]);
+					informacionCompraConciliacionSinICU.setIdTienda(informacionLinea[15]);
+					informacionCompraConciliacionSinICU.setIdCajero(informacionLinea[16]);
+					informacionCompraConciliacionSinICU.setIdCaja(informacionLinea[17]);
+					lstArchivoComprasConciliacion.add(informacionCompraConciliacionSinICU);
+			    }
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		return lstArchivoComprasConciliacion;
+	}
+	
+	/**
 	 * Metodo para la lectura del archivo Alnova
 	 * @return List<ArchivoAlnova>
 	 */
@@ -362,6 +418,58 @@ public class ComprasEmpleadosBusiness
 			
 			HSSFCell celdaTotalCompras = fila.createCell((short) 4);
 			celdaTotalCompras.setCellValue(compraEmpleado.getNumeroCompras());
+			
+		}
+		try {
+			FileOutputStream salida = new FileOutputStream(archivo);
+			libroExcel.write(salida);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * Metodo para generar los reportes de compras
+	 * @param lstComprasEmpleado
+	 * @param informacionJson
+	 */
+	@SuppressWarnings("deprecation")
+	private static void generarReportesCompras(List<InformacionCompraConciliacionSinICU> lstCompras)
+	{
+		System.out.println("\nGenerando archivo .xls de reporte...");
+		String archivoXls=RUTA_ARCHIVOS_CONCILIACIONES.concat(ARCHIVO_REPORTE_COMPRAS);
+		int filaIndice=0;
+		File archivo = new File(archivoXls);
+		HSSFWorkbook libroExcel = new HSSFWorkbook();
+		HSSFSheet hoja1 = libroExcel.createSheet("Reporte compras");
+		HSSFRow fila = hoja1.createRow(filaIndice);
+		HSSFCell celda = fila.createCell((short) 0);
+		celda.setCellValue("Negocio");
+		HSSFCell celda2 = fila.createCell((short) 1);
+		celda2.setCellValue("Monto");
+		HSSFCell celda3 = fila.createCell((short) 2);
+		celda3.setCellValue("Fecha");
+		HSSFCell celda4 = fila.createCell((short) 3);
+		celda4.setCellValue("Hora");
+		
+		for(InformacionCompraConciliacionSinICU compraConciliacion:lstCompras) {
+			filaIndice++;
+			fila=hoja1.createRow(filaIndice);
+			
+			HSSFCell celdaReferencia = fila.createCell((short) 0);
+			celdaReferencia.setCellValue(compraConciliacion.getDescripcionAgenteCompra());
+			
+			HSSFCell celdaNoEmpleado = fila.createCell((short) 1);
+			celdaNoEmpleado.setCellValue(compraConciliacion.getMonto());
+			
+			String fechaHora[]=compraConciliacion.getFechaHoraCompra().split(" ");
+			
+			HSSFCell celdaICU = fila.createCell((short) 2);
+			celdaICU.setCellValue(fechaHora[0]);
+			
+			HSSFCell celdaCompras = fila.createCell((short) 3);
+			celdaCompras.setCellValue(fechaHora[1]);
 			
 		}
 		try {
