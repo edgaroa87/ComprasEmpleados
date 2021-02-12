@@ -6,29 +6,46 @@ public class ComprasEmpleados
 {
 	public static void main(String []args)
 	{
-		/**
-		 * Necesita el archivo
-		 * 		ComprasComercios_SIN_ICU.txt
-		 * 
-		 * Para poder generar el archivo de excel con las referencias a consultar
-		 * 		ReferenciasAlnova.xls
-		 * 
-		 */
-//		ComprasEmpleadosBusiness.generarArchivoReferencias();
 		
 		/**
-		 * Necesita todos los reportes de conciliacion a leer en la ruta
+		 * Metodo para generar el archivo con la informacion de las compras reportadas en los archivos de conciliacion que se comparten a Alnoca
+		 * es necesario depositar el o los archivos de conciliacion de los que se desea obtener el reporte
+		 * 
+		 * Ruta - /Users/edgaronofrealvarez/Desktop/ReporteCompras/Conciliaciones/
+		 * 
+		 * Genera el archivo de excel con las referencias a consultar en
+		 * 		Archivo -> ReferenciasAlnova.xls
+		 * 		Ruta -> /Users/edgaronofrealvarez/Desktop/ReporteCompras/Archivos Generados/
+		 */
+//		ComprasEmpleadosBusiness.generarArchivoReferenciasAlnova();
+		
+		
+		
+		/**
+		 * Metodo para generar el archivo con la informacion de las compras reportadas en los archivos de conciliacion
+		 * es necesario depositar el o los archivos de conciliacion de los que se desea obtener el reporte
+		 * 
+		 * Ruta - /Users/edgaronofrealvarez/Desktop/ReporteCompras/Conciliaciones/
+		 * 
+		 * Genera el archivo de excel con las compras registradas en
+		 * 		Archivo -> ReporteCompras.xls
+		 * 		Ruta -> /Users/edgaronofrealvarez/Desktop/ReporteCompras/Archivos Generados/
+		 * 
 		 */
 		ComprasEmpleadosBusiness.generarReportesConciliacion();
 		
+		
+		
 		/**
-		 * Necesita los archivos
-		 * 		ComprasComercios_SIN_ICU.txt
-		 * 		ReporteAlnova.txt
-		 * 		EmpleadosParticipantes.txt
+		 * Metodo para generar el reporte de los empleados que realizaron compras en Supermercados, necesita los siguiente archivos en:
+		 * 		Archivos de conciliacion /Users/edgaronofrealvarez/Desktop/ReporteCompras/Conciliaciones/
+		 * 		ReporteAlnova.txt en /Users/edgaronofrealvarez/Desktop/ReporteCompras/Concurso/
+		 * 		EmpleadosParticipantes.txt en /Users/edgaronofrealvarez/Desktop/ReporteCompras/Concurso/
 		 * 
-		 * Para poder generar el archivo de excel con la respuesta
-		 * 		ComprasEmpleadoSemana.xls
+		 * 
+		 *Genera el archivo de excel con la respuesta en:
+		 * 		Archivo -> ComprasEmpleadoSemana.xls
+		 * 		Ruta -> /Users/edgaronofrealvarez/Desktop/ReporteCompras/Archivos Generados/
 		 * 
 		 */
 //		ComprasEmpleadosBusiness.generaReporteComprasEmpleadosAlnova();
