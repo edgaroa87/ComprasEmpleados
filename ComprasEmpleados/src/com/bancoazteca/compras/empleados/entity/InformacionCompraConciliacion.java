@@ -6,7 +6,7 @@ package com.bancoazteca.compras.empleados.entity;
  * @author edgaronofrealvarez
  *
  */
-public class InformacionCompraConciliacionSinICU
+public class InformacionCompraConciliacion
 {
 	private String idAgente;
 	
@@ -43,6 +43,10 @@ public class InformacionCompraConciliacionSinICU
 	private String idCajero;
 	
 	private String idCaja;
+	
+	private String icu;
+	
+	private boolean esEmpleado;
 
 	public String getIdAgente() {
 		return idAgente;
@@ -187,5 +191,20 @@ public class InformacionCompraConciliacionSinICU
 	public void setIdCaja(String idCaja) {
 		this.idCaja = idCaja;
 	}
-	
+
+	public String getIcu() {
+		return icu;
+	}
+
+	public void setIcu(String icu) {
+		this.icu = icu;
+	}
+
+	public boolean isEsEmpleado() {
+		return esEmpleado;
+	}
+
+	public void setEsEmpleado(boolean esEmpleado) {
+		this.esEmpleado = esEmpleado;
+	}
 }
